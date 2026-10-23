@@ -78,6 +78,17 @@ It is **not active by default**. To try it, copy `native/build_qemu_11.0.2.yml` 
 
 Settings used for this run: `qemu64`, 1 CPU, 2048 MB RAM, IDE (safe) disk, 21.5 GB virtual disk, Network on, screen not in GPU mode.
 
+The app log of a "Start from disk" run (QEMU 10.0.0 build) shows how QEMU was started (paths shortened):
+
+```
+qemu-system-x86_64 -M pc,usb=off,hpet=off -accel tcg,thread=single,tb-size=128
+  -cpu qemu64 -smp 1 -m 2048 -nodefaults -monitor none -serial none -display none
+  -vga std -drive file=vmdisk.img,format=raw,if=ide,index=0 -boot order=c
+  -netdev user,id=n0 -device virtio-net-pci,netdev=n0 -device virtio-tablet-pci
+```
+
+The log also reports `uwp_jit: code buffer of 134217728 bytes is ready (read+write+execute)` (the JIT works) and `QEMU returned code 0` after a normal shutdown.
+
 | Command | Result |
 |---|---|
 | `lscpu` | QEMU Virtual CPU version 2.5+ (`qemu64`), 1 CPU, flags up to SSE3 and `cx16`, no SSE4 or AVX. `svm` is shown only because `qemu64` advertises it; there is no usable hardware virtualization |
