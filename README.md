@@ -6,7 +6,7 @@ This project is **based on [YoCanIGetUhhhh/XboxInstallOtherOS](https://github.co
 
 The app uses [QEMU](https://www.qemu.org/) to emulate an x86_64 PC in software. The Xbox does not let apps use a hypervisor, so this is **much slower than a real PC**. It is good enough for a light desktop (XFCE), a terminal and small servers.
 
-> **Status:** the package builds with GitHub Actions (QEMU 10.0.0 workflow, UWP audit: 0 blocked imports), installs on an **Xbox Series X** in Developer Mode, starts, and boots the **Debian 13 netinst installer** (see [Tested with](#tested-with)). Items marked *not tested* below are still unverified.
+> **Status:** the package builds with GitHub Actions (QEMU 10.0.0 workflow, UWP audit: 0 blocked imports), installs on an **Xbox Series X** in Developer Mode, starts, and installs **Debian 13.7.0** and boots it from the virtual disk (see [Tested with](#tested-with)). Items marked *not tested* below are still unverified.
 
 ## What this version changes
 
@@ -66,11 +66,12 @@ It is **not active by default**. To try it, copy `native/build_qemu_11.0.2.yml` 
 | Console | Xbox Series X, Developer Mode, Device Portal |
 | Build | GitHub Actions `build.yml` (QEMU **v10.0.0**), `.msix` + 3 x64 `.appx` from the Release |
 | App | Installs, starts, main menu shows |
-| Guest ISO | Debian 13 "trixie" amd64 **netinst** (`debian-13.7.0-amd64-netinst.iso`), Xfce desktop chosen in the installer |
-| Installer | Starts and runs on the Xbox (reached "Loading additional components") |
+| Guest ISO | Debian GNU/Linux 13.7.0 "Trixie" official amd64 **netinst with firmware** (`debian-13.7.0-amd64-netinst.iso`, label 20260912), Xfce chosen in the installer |
+| Installer | Full install finished on the Xbox in about **1 h 03 min** (partitioning, base system, Xfce + standard utilities, GRUB on the virtual disk) |
+| Boot from disk | First boot after install took about **5 minutes** |
 | Virtual disk | Created in Settings and stored in the app's `LocalState` |
 | CPU type | `qemu64` (default) |
-| Not confirmed yet | Finished install and first boot from disk, speed numbers, `Haswell` / `max`, the QEMU 11.0.2 build |
+| Not confirmed yet | Desktop usage and speed numbers, `Haswell` / `max`, the QEMU 11.0.2 build |
 
 ## Tools used
 
