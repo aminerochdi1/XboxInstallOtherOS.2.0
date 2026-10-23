@@ -184,9 +184,9 @@ jobs:
           gcc -O2 -c -o uwp_entry.o ../../native/uwp_entry.c
           gcc -O2 -c -o uwp_shim.o ../../native/uwp_shim.c
           gcc -O2 -c -o uwp_jit.o ../../native/uwp_jit.c
-          python ../../native/compile_like_qemu.py ../../native/uwp_display.c uwp_display.o
+          python ../../native/compile_like_qemu_11x.py ../../native/uwp_display.c uwp_display.o
           # QEMU's own build left the egl-headless display out (no object file for it), so compile it here the same way.
-          python ../../native/compile_like_qemu.py ../ui/egl-headless.c egl_headless.o || echo "NOTE: egl-headless.c did not compile"
+          python ../../native/compile_like_qemu_11x.py ../ui/egl-headless.c egl_headless.o || echo "NOTE: egl-headless.c did not compile"
           ls -l egl_headless.o || true
           rm -f qemu-system-x86_64.exe
           ninja -d keeprsp qemu-system-x86_64.exe || echo "NOTE: exe link failed again (expected); continuing with the DLL link"
@@ -457,9 +457,9 @@ jobs:
           $all = @(Get-ChildItem out -Recurse -File | Where-Object { $_.Extension -eq '.msix' -or ($_.Extension -eq '.appx' -and $_.FullName -match '[\\/]x64[\\/]') })
           $files = @($all | Sort-Object Name -Unique | ForEach-Object { $_.FullName })
           Write-Host "Release files:"; $files | ForEach-Object { Write-Host $_ }
-          $notes = "Install Other OS $ver. Download the .msix file and the three .appx dependency files (x64) from the list below, then install them with the Xbox Device Portal (Apps manager). See the README for the steps."
-          $tag = "v$ver-run$($env:GITHUB_RUN_NUMBER)"
-          $out = & gh release create $tag @files --repo $env:GITHUB_REPOSITORY --title "Install Other OS $ver" --notes $notes 2>&1 | Out-String
+          $notes = "Install Other OS $ver (built with QEMU 11.0.2, untested). Download the .msix file and the three .appx dependency files (x64) from the list below, then install them with the Xbox Device Portal (Apps manager). See the README for the steps."
+          $tag = "v$ver-qemu11-run$($env:GITHUB_RUN_NUMBER)"
+          $out = & gh release create $tag @files --repo $env:GITHUB_REPOSITORY --title "Install Other OS $ver (QEMU 11.0.2 test)" --notes $notes 2>&1 | Out-String
           Write-Host $out
           if ($LASTEXITCODE -ne 0) {
             $msg = ($out -replace "\r?\n", " | ")
