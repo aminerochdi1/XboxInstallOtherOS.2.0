@@ -1,1 +1,57 @@
+# --- original entry ---
 __pycache__/
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# --- backups and editor leftovers ---
+*.orig
+*.rej
+*.bak
+*.swp
+*~
+.vscode/
+.idea/
+
+# --- Visual Studio / .NET build output ---
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.csproj.user
+*.binlog
+AppPackages/
+BundleArtifacts/
+Generated Files/
+*.pfx
+*.snk
+
+# --- packages and downloads ---
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+*.appxsym
+*.msixupload
+*.iso
+*.qcow2
+*.img
+
+# --- files the build workflow creates (never commit these) ---
+qemu-src/
+virgl-src/
+qemudll/
+.ccache/
+*.log
+configure.log
+build.log
+ccache-stats.txt
+uwp-audit.txt
+virgl-patch.txt
+*.rsp
+*.o
+*.dll
