@@ -1,4 +1,4 @@
-name: Build Xbox UWP package
+name: Build Xbox UWP package (QEMU 11.0.2 test)
 
 on:
   workflow_dispatch:
