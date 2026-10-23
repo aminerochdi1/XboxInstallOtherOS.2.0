@@ -74,6 +74,20 @@ It is **not active by default**. To try it, copy `native/build_qemu_11.0.2.yml` 
 | CPU type | `qemu64` (default) |
 | Not confirmed yet | Speed numbers for apps (browser, compiling), `Haswell` / `max`, the QEMU 11.0.2 build |
 
+### Guest system info (measured inside Debian)
+
+Settings used for this run: `qemu64`, 1 CPU, 2048 MB RAM, IDE (safe) disk, 21.5 GB virtual disk, Network on, screen not in GPU mode.
+
+| Command | Result |
+|---|---|
+| `lscpu` | QEMU Virtual CPU version 2.5+ (`qemu64`), 1 CPU, flags up to SSE3 and `cx16`, no SSE4 or AVX. `svm` is shown only because `qemu64` advertises it; there is no usable hardware virtualization |
+| `free -h` | 1.9 GiB RAM (463 MiB used with Xfce idle), 1.1 GiB swap |
+| `df -h /` | `/dev/sda1` 19 GB, 4.0 GB used, 14 GB free |
+| `lspci` | Intel 440FX / PIIX3 (BIOS PC), PIIX3 IDE, standard VGA `1234:1111`, Virtio network, Virtio input |
+| `ip a` | `ens3` up with `10.0.2.15/24` (QEMU user-mode networking) |
+
+The CPU cache sizes, BogoMIPS and "Not affected" vulnerability lines shown by `lscpu` describe the emulated CPU, not the Xbox.
+
 ## Tools used
 
 - **GitHub Actions** (`windows-latest`) with **MSYS2 / MinGW (UCRT64)** to build QEMU as a DLL
