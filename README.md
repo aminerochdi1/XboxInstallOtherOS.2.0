@@ -6,14 +6,14 @@ This project is **based on [YoCanIGetUhhhh/XboxInstallOtherOS](https://github.co
 
 The app uses [QEMU](https://www.qemu.org/) to emulate an x86_64 PC in software. The Xbox does not let apps use a hypervisor, so this is **much slower than a real PC**. It is good enough for a light desktop (XFCE), a terminal and small servers.
 
-> **Status:** the changes listed below have **not been built or tested on a console yet**. Update this line after you test them.
+> **Status:** the package builds with GitHub Actions (QEMU 10.0.0 workflow, UWP audit: 0 blocked imports), installs on an **Xbox Series X** in Developer Mode, starts, and boots the **Debian 13 netinst installer** (see [Tested with](#tested-with)). Items marked *not tested* below are still unverified.
 
 ## What this version changes
 
 | Change | Where | State |
 |---|---|---|
-| Two more CPU types in Settings: `Haswell` and `max` (default stays `qemu64`) | `MainPage.xaml.cs` | Not tested |
-| Optional build against **QEMU 11.0.2** instead of 10.0.0 | `native/build_qemu_11.0.2.yml`, `native/patch_egl_for_angle_11x.py` | Patches tested on copies of the QEMU source; **not compiled** |
+| Two more CPU types in Settings: `Haswell` and `max` (default stays `qemu64`) | `MainPage.xaml.cs` | Builds and the app runs. `Haswell` / `max` not tested in a guest yet |
+| Optional build against **QEMU 11.0.2** instead of 10.0.0 | `native/build_qemu_11.0.2.yml`, `native/patch_egl_for_angle_11x.py` | Patches tested on copies of the QEMU source; the build was **not confirmed** to finish and was **not run** on a console |
 
 Everything else is unchanged from the original.
 
@@ -58,6 +58,29 @@ These only change which instructions the guest software may use. **They do not m
 The original build clones QEMU `v10.0.0` and applies a set of patches. The new workflow file clones `v11.0.2` and uses an updated EGL patch (in 11.0.2, `egl-headless.c` no longer contains the call the old patch looked for). All other patches applied cleanly to a copy of 11.0.2.
 
 It is **not active by default**. To try it, copy `native/build_qemu_11.0.2.yml` to `.github/workflows/` and run it manually. Keep the original `build.yml` as the fallback.
+
+## Tested with
+
+| Item | Result |
+|---|---|
+| Console | Xbox Series X, Developer Mode, Device Portal |
+| Build | GitHub Actions `build.yml` (QEMU **v10.0.0**), `.msix` + 3 x64 `.appx` from the Release |
+| App | Installs, starts, main menu shows |
+| Guest ISO | Debian 13 "trixie" amd64 **netinst** (`debian-13.7.0-amd64-netinst.iso`), Xfce desktop chosen in the installer |
+| Installer | Starts and runs on the Xbox (reached "Loading additional components") |
+| Virtual disk | Created in Settings and stored in the app's `LocalState` |
+| CPU type | `qemu64` (default) |
+| Not confirmed yet | Finished install and first boot from disk, speed numbers, `Haswell` / `max`, the QEMU 11.0.2 build |
+
+## Tools used
+
+- **GitHub Actions** (`windows-latest`) with **MSYS2 / MinGW (UCRT64)** to build QEMU as a DLL
+- **QEMU 10.0.0** (optional test: 11.0.2), **virglrenderer**, **ANGLE** (OpenGL ES on Direct3D 11), **libslirp**
+- `uwp_audit.py` (Python + pefile) and the Windows SDK `WindowsApp.lib` to check UWP-allowed imports
+- **Xbox Device Portal** (`https://<xbox-ip>:11443`) to deploy the package
+- [xb-homebrew-vault](https://github.com/marcelofrau/xb-homebrew-vault) to send the Debian ISO to the Xbox and install the app
+- MacBook with git and GitHub for editing and pushing
+- **Claude Code** for code changes, review and documentation
 
 ## What you need
 
