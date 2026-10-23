@@ -69,9 +69,10 @@ It is **not active by default**. To try it, copy `native/build_qemu_11.0.2.yml` 
 | Guest ISO | Debian GNU/Linux 13.7.0 "Trixie" official amd64 **netinst with firmware** (`debian-13.7.0-amd64-netinst.iso`, label 20260912), Xfce chosen in the installer |
 | Installer | Full install finished on the Xbox in about **1 h 03 min** (partitioning, base system, Xfce + standard utilities, GRUB on the virtual disk) |
 | Boot from disk | First boot after install took about **5 minutes** |
+| Desktop | Xfce desktop reached; the Thunar file manager opens (1280x1024 max, `qemu64`). Small delay between the Xbox pointer and the guest cursor |
 | Virtual disk | Created in Settings and stored in the app's `LocalState` |
 | CPU type | `qemu64` (default) |
-| Not confirmed yet | Desktop usage and speed numbers, `Haswell` / `max`, the QEMU 11.0.2 build |
+| Not confirmed yet | Speed numbers for apps (browser, compiling), `Haswell` / `max`, the QEMU 11.0.2 build |
 
 ## Tools used
 
