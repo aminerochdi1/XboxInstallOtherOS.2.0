@@ -6,14 +6,14 @@ This project is **based on [YoCanIGetUhhhh/XboxInstallOtherOS](https://github.co
 
 The app uses [QEMU](https://www.qemu.org/) to emulate an x86_64 PC in software. The Xbox does not let apps use a hypervisor, so this is **much slower than a real PC**. It is good enough for a light desktop (XFCE), a terminal and small servers.
 
-> **Status:** the package builds with GitHub Actions (QEMU 10.0.0 workflow, UWP audit: 0 blocked imports), installs on an **Xbox Series X** in Developer Mode, starts, and installs **Debian 13.7.0** and boots it from the virtual disk (see [Tested with](#tested-with)). Items marked *not tested* below are still unverified.
+> **Status:** the package builds with GitHub Actions (the QEMU 11.0.2 test workflow succeeded; the original QEMU 10.0.0 workflow also built, UWP audit: 0 blocked imports), installs on an **Xbox Series X** in Developer Mode, starts, and installs **Debian 13.7.0** and boots it from the virtual disk using the **QEMU 11.0.2** build (see [Tested with](#tested-with)). Items marked *not tested* below are still unverified.
 
 ## What this version changes
 
 | Change | Where | State |
 |---|---|---|
-| Two more CPU types in Settings: `Haswell` and `max` (default stays `qemu64`) | `MainPage.xaml.cs` | Builds and the app runs. `Haswell` / `max` not tested in a guest yet |
-| Optional build against **QEMU 11.0.2** instead of 10.0.0 | `native/build_qemu_11.0.2.yml`, `native/patch_egl_for_angle_11x.py` | Patches tested on copies of the QEMU source; the build was **not confirmed** to finish and was **not run** on a console |
+| Two more CPU types in Settings: `Haswell` and `max` (default stays `qemu64`) | `MainPage.xaml.cs` | Builds and the app runs. `Haswell` tested (works, but slower in a quick benchmark); `max` not tested |
+| Optional build against **QEMU 11.0.2** instead of 10.0.0 | `native/build_qemu_11.0.2.yml`, `native/patch_egl_for_angle_11x.py` | Built successfully with GitHub Actions; **installed and run on an Xbox Series X** (Debian guest reports machine type `pc-i440fx-11.0`) |
 
 Everything else is unchanged from the original.
 
@@ -53,18 +53,18 @@ The original `build.yml`, `native/patch_egl_for_angle.py` and all native sources
 
 These only change which instructions the guest software may use. **They do not make the VM faster**, and emulated AVX2 code can even be slower. If a guest misbehaves, go back to `qemu64`.
 
-### The QEMU 11.0.2 build
+### The QEMU 11.0.2 build (tested on the console)
 
 The original build clones QEMU `v10.0.0` and applies a set of patches. The new workflow file clones `v11.0.2` and uses an updated EGL patch (in 11.0.2, `egl-headless.c` no longer contains the call the old patch looked for). All other patches applied cleanly to a copy of 11.0.2.
 
-It is **not active by default**. To try it, copy `native/build_qemu_11.0.2.yml` to `.github/workflows/` and run it manually. Keep the original `build.yml` as the fallback.
+It is **not active by default** in the repo's main workflow list: both workflows exist side by side. The first 11.0.2 attempt failed (wrong build target name for `ui/console.c`), the fixed workflow then built and its package ran on the Xbox. The original `build.yml` stays as the fallback. To try it, copy `native/build_qemu_11.0.2.yml` to `.github/workflows/` and run it manually. Keep the original `build.yml` as the fallback.
 
 ## Tested with
 
 | Item | Result |
 |---|---|
 | Console | Xbox Series X, Developer Mode, Device Portal |
-| Build | GitHub Actions `build.yml` (QEMU **v10.0.0**), `.msix` + 3 x64 `.appx` from the Release |
+| Build | GitHub Actions workflow "QEMU 11.0.2 test" (QEMU **v11.0.2**), `.msix` + 3 x64 `.appx` from the Release `v1.2.42.0-qemu11-run2`. Inside Debian `cat /sys/class/dmi/id/product_version` prints `pc-i440fx-11.0` |
 | App | Installs, starts, main menu shows |
 | Guest ISO | Debian GNU/Linux 13.7.0 "Trixie" official amd64 **netinst with firmware** (`debian-13.7.0-amd64-netinst.iso`, label 20260912), Xfce chosen in the installer |
 | Installer | Full install finished on the Xbox in about **1 h 03 min** (partitioning, base system, Xfce + standard utilities, GRUB on the virtual disk) |
@@ -72,13 +72,13 @@ It is **not active by default**. To try it, copy `native/build_qemu_11.0.2.yml` 
 | Desktop | Xfce desktop reached; the Thunar file manager opens (1280x1024 max, `qemu64`). Small delay between the Xbox pointer and the guest cursor |
 | Virtual disk | Created in Settings and stored in the app's `LocalState` |
 | CPU type | `qemu64` (default) |
-| Not confirmed yet | Speed numbers for apps (browser, compiling), `Haswell` / `max`, the QEMU 11.0.2 build |
+| Not confirmed yet | Speed numbers for apps (browser, compiling), `max`, the QEMU 10.0.0 build on the console (it built but was not the one tested), 1-CPU runs |
 
 ### Guest system info (measured inside Debian)
 
 Settings used for this run: `qemu64`, 1 CPU, 2048 MB RAM, IDE (safe) disk, 21.5 GB virtual disk, Network on, screen not in GPU mode.
 
-The app log of a "Start from disk" run (QEMU 10.0.0 build) shows how QEMU was started (paths shortened):
+The app log of a "Start from disk" run (QEMU 11.0.2 build) shows how QEMU was started (paths shortened):
 
 ```
 qemu-system-x86_64 -M pc,usb=off,hpet=off -accel tcg,thread=single,tb-size=128
@@ -116,7 +116,7 @@ All runs: Debian 13.7.0 Xfce, 2048 MB RAM, IDE disk, code cache 128 MB, one run 
 ## Tools used
 
 - **GitHub Actions** (`windows-latest`) with **MSYS2 / MinGW (UCRT64)** to build QEMU as a DLL
-- **QEMU 10.0.0** (optional test: 11.0.2), **virglrenderer**, **ANGLE** (OpenGL ES on Direct3D 11), **libslirp**
+- **QEMU 11.0.2** (the original project builds 10.0.0), **virglrenderer**, **ANGLE** (OpenGL ES on Direct3D 11), **libslirp**
 - `uwp_audit.py` (Python + pefile) and the Windows SDK `WindowsApp.lib` to check UWP-allowed imports
 - **Xbox Device Portal** (`https://<xbox-ip>:11443`) to deploy the package
 - [xb-homebrew-vault](https://github.com/marcelofrau/xb-homebrew-vault) to send the Debian ISO to the Xbox and install the app
@@ -179,7 +179,7 @@ Hold **Ctrl + Alt + Shift**, then press: **V** save state and return to the menu
 | Virtual PC stops by itself | The app lost the foreground | Keep the app in front. Save state before leaving. |
 | Blank or wrong colours in "GPU" screen mode | Experimental graphics path | Use another screen mode (Auto or a fixed size). |
 | Linux disappeared after a reinstall | Uninstalling the app deletes the virtual disk | Back up before uninstalling or downgrading. |
-| QEMU 11.0.2 build fails or the app will not start with it | The 11.0.2 build is untested | Use the original `build.yml` (QEMU 10.0.0). |
+| App will not start or misbehaves with the QEMU 11.0.2 build | Newer QEMU than the original project uses (it ran fine on one console in our tests, with no long-term testing) | Use the original `build.yml` (QEMU 10.0.0). |
 
 Under the Visual Studio debugger the memory limits do not apply, so something that works there may still crash when installed normally.
 
