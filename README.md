@@ -99,6 +99,20 @@ The log also reports `uwp_jit: code buffer of 134217728 bytes is ready (read+wri
 
 The CPU cache sizes, BogoMIPS and "Not affected" vulnerability lines shown by `lscpu` describe the emulated CPU, not the Xbox.
 
+### Quick benchmark: CPU type and number of CPUs
+
+All runs: Debian 13.7.0 Xfce, 2048 MB RAM, IDE disk, code cache 128 MB, one run each (no repeats, so treat small differences as noise). Test file: 200 MiB of zeros in `/tmp`.
+
+| Run | CPU type | CPUs | `sha256sum` (1 job) | 2 jobs at once | Boot |
+|---|---|---|---|---|---|
+| B | `qemu64` | 2 | 3.087 s | 3.330 s | about 2 min |
+| D | `Haswell` | 2 | 8.296 s | 8.535 s | about 2 min |
+
+- With 2 CPUs two jobs finish in about the same time as one (about 1.85x to 1.95x speed-up), so both virtual CPUs run in parallel on the Xbox.
+- `Haswell` was about **2.7x slower** than `qemu64` in this test. Likely cause (not verified): programs choose their AVX2 code path when it is advertised, and emulated AVX2 is slower than the plain code path.
+- **Recommendation: keep `qemu64`.** Use `Haswell` or `max` only when a program needs the newer instructions.
+- Not measured: 1 CPU runs (A, C) and `max`. The first boot after installing took about 5 minutes; later boots about 2 minutes, with 1 and 2 CPUs not compared fairly.
+
 ## Tools used
 
 - **GitHub Actions** (`windows-latest`) with **MSYS2 / MinGW (UCRT64)** to build QEMU as a DLL
