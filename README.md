@@ -12,7 +12,7 @@ The app uses [QEMU](https://www.qemu.org/) to emulate an x86_64 PC in software. 
 
 | Change | Where | State |
 |---|---|---|
-| Two more CPU types in Settings: `Haswell` and `max` (default stays `qemu64`) | `MainPage.xaml.cs` | Builds and the app runs. `Haswell` tested (works, but slower in a quick benchmark); `max` not tested |
+| Two more CPU types in Settings: `Haswell` and `max` (default stays `qemu64`) | `MainPage.xaml.cs` | Builds and the app runs. `Haswell` tested (works, but slower in a quick benchmark); `max` boots and runs with 2 CPUs (no benchmark yet) |
 | Optional build against **QEMU 11.0.2** instead of 10.0.0 | `native/build_qemu_11.0.2.yml`, `native/patch_egl_for_angle_11x.py` | Built successfully with GitHub Actions; **installed and run on an Xbox Series X** (Debian guest reports machine type `pc-i440fx-11.0`) |
 
 Everything else is unchanged from the original.
@@ -82,7 +82,7 @@ It is **not active by default** in the repo's main workflow list: both workflows
 | Desktop | Xfce desktop reached; the Thunar file manager opens (1280x1024 max, `qemu64`). Small delay between the Xbox pointer and the guest cursor |
 | Virtual disk | Created in Settings and stored in the app's `LocalState` |
 | CPU type | `qemu64` (default) |
-| Not confirmed yet | Speed numbers for apps (browser, compiling), `max`, the QEMU 10.0.0 build on the console (it built but was not the one tested), 1-CPU runs |
+| Not confirmed yet | Speed numbers for apps (browser, compiling), `max` benchmark numbers, the QEMU 10.0.0 build on the console (it built but was not the one tested), 1-CPU runs |
 
 ### Guest system info (measured inside Debian)
 
@@ -121,7 +121,7 @@ All runs: Debian 13.7.0 Xfce, 2048 MB RAM, IDE disk, code cache 128 MB, one run 
 - With 2 CPUs two jobs finish in about the same time as one (about 1.85x to 1.95x speed-up), so both virtual CPUs run in parallel on the Xbox.
 - `Haswell` was about **2.7x slower** than `qemu64` in this test. Likely cause (not verified): programs choose their AVX2 code path when it is advertised, and emulated AVX2 is slower than the plain code path.
 - **Recommendation: keep `qemu64`.** Use `Haswell` or `max` only when a program needs the newer instructions.
-- Not measured: 1 CPU runs (A, C) and `max`. The first boot after installing took about 5 minutes; later boots about 2 minutes, with 1 and 2 CPUs not compared fairly.
+- `max` with 2 CPUs boots and runs (reported by the tester), but was not benchmarked. Not measured: 1 CPU runs (A, C). The first boot after installing took about 5 minutes; later boots about 2 minutes, with 1 and 2 CPUs not compared fairly.
 
 ## Tools used
 
