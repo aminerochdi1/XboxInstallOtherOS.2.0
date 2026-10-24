@@ -17,6 +17,16 @@ The app uses [QEMU](https://www.qemu.org/) to emulate an x86_64 PC in software. 
 
 Everything else is unchanged from the original.
 
+### Screenshots
+
+The **CPU type** button in Settings now cycles through `qemu64`, `Nehalem`, `Haswell` and `max`. Photos taken on an Xbox Series X (the help text under the button is still the original author's and does not mention the two new types yet):
+
+| `Haswell` selected | `max` selected |
+|---|---|
+| ![Settings screen with CPU type Haswell](docs/images/settings-cpu-haswell.jpg) | ![Settings screen with CPU type max](docs/images/settings-cpu-max.jpg) |
+
+Settings shown: 2 CPUs, 2048 MB RAM, 128 MB code cache, IDE disk, 20 GB disk (Debian reports it as 21.5 GB, which is the same size in decimal units), Auto screen size.
+
 ### Changelog
 
 **1. CPU choices** (`MainPage.xaml.cs`, around line 422)
@@ -76,7 +86,7 @@ It is **not active by default** in the repo's main workflow list: both workflows
 
 ### Guest system info (measured inside Debian)
 
-Settings used for this run: `qemu64`, 1 CPU, 2048 MB RAM, IDE (safe) disk, 21.5 GB virtual disk, Network on, screen not in GPU mode.
+Settings used for this run: `qemu64`, 1 CPU, 2048 MB RAM, IDE (safe) disk, 20 GB virtual disk (shown as 21.5 GB inside Debian), Network on, screen not in GPU mode.
 
 The app log of a "Start from disk" run (QEMU 11.0.2 build) shows how QEMU was started (paths shortened):
 
