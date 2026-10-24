@@ -36,6 +36,12 @@ namespace XboxVmHost
         private static string NetFlagPath { get { return Path.Combine(ApplicationData.Current.LocalFolder.Path, "net.on"); } }
         private static bool NetOn { get { try { return File.Exists(NetFlagPath); } catch { return false; } } }
 
+        // Optional SSH forward: lets another device on the home network reach the Linux SSH server
+        // (Xbox IP, port SshHostPort -> Linux port 22). Off unless the user turns it on. Only used when Network is ON.
+        private const int SshHostPort = 2222;
+        private static string SshFlagPath { get { return Path.Combine(ApplicationData.Current.LocalFolder.Path, "ssh.on"); } }
+        private static bool SshOn { get { try { return File.Exists(SshFlagPath); } catch { return false; } } }
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -420,7 +426,8 @@ namespace XboxVmHost
         // Each is remembered in its own small file. Defaults are the settings that are known to work.
         // =====================================================================
         // qemu64 = safe default. Nehalem/Haswell = fixed Intel feature sets (Haswell adds AVX2/BMI/FMA). max = every feature QEMU's translator supports.
-        private static readonly string[] CpuChoices = { "qemu64", "Nehalem", "Haswell", "max" };
+        // EPYC-Rome = AMD Zen 2 model (same generation as the Xbox Series X CPU). Exists in QEMU 10.0.0 and 11.0.2. Experimental: untested on a console.
+        private static readonly string[] CpuChoices = { "qemu64", "Nehalem", "Haswell", "max", "EPYC-Rome" };
         private static readonly int[] TbChoices = { 64, 128, 256 };
         private static readonly int[] CpuCountChoices = { 1, 2 };
         private static string CpuCfgPath { get { return Path.Combine(ApplicationData.Current.LocalFolder.Path, "cpu.cfg"); } }
@@ -568,6 +575,7 @@ namespace XboxVmHost
             try { File.Delete(SmpCfgPath); } catch { }
             try { File.Delete(DiskModeCfgPath); } catch { }
             try { File.Delete(ScreenCfgPath); } catch { }
+            try { File.Delete(SshFlagPath); } catch { }
             RefreshStatus();
         }
 
@@ -645,7 +653,7 @@ namespace XboxVmHost
                 StatusDisk.Text = !haveDisk ? "not created yet"
                     : SizeText(DiskPath) + " main disk" + (haveMedia ? " + " + SizeText(MediaPath) + " storage disk" : "");
                 StatusRam.Text = VmRamMb + " MB   (Xbox app limit " + AppLimitMb() + " MB)";
-                StatusNet.Text = NetOn ? "ON (NAT, 10.0.2.15)" : "off";
+                StatusNet.Text = NetOn ? "ON (NAT, 10.0.2.15)" + (SshOn ? ", SSH forward on port " + SshHostPort : "") : "off";
                 StatusSpeed.Text = SpeedText;
                 CpuModelButton.Content = "CPU type: " + VmCpuModel + " (press to change)";
                 TbButton.Content = "Code cache: " + VmTbMb + " MB (press to change)";
@@ -657,6 +665,7 @@ namespace XboxVmHost
                     : "Defaults are the recommended settings. Change ONE setting at a time.";
                 RamButton.Content = "Virtual RAM: " + VmRamMb + " MB (press to change)";
                 NetToggleButton.Content = NetOn ? "Network: ON (press to turn off)" : "Network: off (press to turn on)";
+                SshToggleButton.Content = SshOn ? "SSH forward: ON, port " + SshHostPort + " (press to turn off)" : "SSH forward: off (press to turn on)";
                 BootDiskButton.IsEnabled = haveDisk && !_qemuUsed;
                 BootIsoButton.IsEnabled = iso != null && !_qemuUsed;
                 bool haveState = StateValid();
@@ -747,6 +756,17 @@ namespace XboxVmHost
             RefreshStatus();
         }
 
+        private void SshToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (SshOn) File.Delete(SshFlagPath);
+                else File.WriteAllText(SshFlagPath, "on");
+            }
+            catch (Exception ex) { Log("Could not change the SSH forward setting: " + ex.Message); }
+            RefreshStatus();
+        }
+
         private static long AppLimitMb()
         {
             try { return (long)(MemoryManager.AppMemoryUsageLimit / (1024UL * 1024UL)); } catch { return 0; }
@@ -825,7 +845,9 @@ namespace XboxVmHost
         private void AddNetwork(List<string> extra)
         {
             // romfile= (empty) because the network card's boot ROM file is not packaged and is not needed here.
-            if (NetOn) extra.AddRange(new string[] { "-netdev", "user,id=n0", "-device", "virtio-net-pci,netdev=n0,romfile=" });
+            // With the SSH forward on: hostfwd=tcp::2222-:22 (all host addresses, host port 2222 -> guest port 22).
+            string netdev = SshOn ? "user,id=n0,hostfwd=tcp::" + SshHostPort + "-:22" : "user,id=n0";
+            if (NetOn) extra.AddRange(new string[] { "-netdev", netdev, "-device", "virtio-net-pci,netdev=n0,romfile=" });
         }
 
         private void StartVm(string title, string memoryMb, string[] extra)

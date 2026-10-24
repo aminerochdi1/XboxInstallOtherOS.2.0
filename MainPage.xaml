@@ -160,7 +160,7 @@
                 <TextBlock x:Name="SpeedNote" FontSize="13" FontWeight="SemiBold" Foreground="#7A3E00" TextWrapping="Wrap" Margin="0,0,0,8"/>
 
                 <Button x:Name="CpuModelButton" Content="CPU type" Style="{StaticResource MainButton}" Click="CpuModelButton_Click"/>
-                <TextBlock Text="qemu64 is the fastest and the recommended choice. Nehalem is an older, more cautious option."
+                <TextBlock Text="qemu64 is the fastest and the recommended choice. Nehalem is an older, more cautious option. Haswell reports an Intel CPU and was slower in our tests. max adds newer instructions and ran as fast as qemu64. EPYC-Rome (AMD Zen 2) is experimental."
                            FontSize="12" Foreground="#272727" TextWrapping="Wrap" Margin="4,0,0,6"/>
 
                 <Button x:Name="TbButton" Content="Code cache" Style="{StaticResource MainButton}" Click="TbButton_Click"/>
@@ -185,6 +185,10 @@
                         Click="RamButton_Click"/>
                 <Button x:Name="NetToggleButton" Content="Network" Style="{StaticResource MainButton}"
                         Click="NetToggleButton_Click"/>
+                <Button x:Name="SshToggleButton" Content="SSH forward" Style="{StaticResource MainButton}"
+                        Click="SshToggleButton_Click"/>
+                <TextBlock Text="Needs Network ON. Reach Linux's SSH server from another device on your home network at the Xbox IP, port 2222. Install openssh-server in Linux first. If Linux does not start with this on, turn it off."
+                           FontSize="12" Foreground="#272727" TextWrapping="Wrap" Margin="4,0,0,6"/>
                 <Button x:Name="DiskSizeButton" Content="Disk size" Style="{StaticResource MainButton}" Click="DiskSizeButton_Click"/>
                 <Button x:Name="CreateDiskButton" Content="Create virtual disk" Style="{StaticResource CreateButton}"
                         HorizontalContentAlignment="Left" Margin="0,0,0,2" Click="CreateDiskButton_Click"/>
